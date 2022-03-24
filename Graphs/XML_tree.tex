@@ -1,0 +1,25 @@
+
+\begin{tikzpicture}[level distance=1.5cm,
+  level 1/.style={sibling distance=3.5cm},
+  level 2/.style={sibling distance=3cm},
+  element/.style={ draw=black!50!green, fill=white, semithick, minimum size=7mm, align=center},
+  attribute/.style={ draw=red, fill=white, semithick, minimum size=7mm, align=center},
+  textnode/.style={ draw=black, fill=white, semithick, minimum size=7mm, align=center}]
+  \node [element]{Song}
+    child {node [element]{Artist}
+      child {node [textnode]{Deep \\ Purple}}
+    }
+    child {node [element]{Name}
+      child {node [attribute]{Machine \\ Head} edge from parent node[left, color=green!60!red]{album}}
+      child {node [textnode]{Smoke on \\ the Water}}
+    }
+    child {node [element]{Year}
+      child {node [textnode]{1972}}
+    }
+    child {node [element]{Genre}
+      child {node [attribute]{Rock} edge from parent node[left, color=green!60!red]{type}}
+      child {node [element]{Subgenre}
+        child {node [textnode]{Hard Rock}}
+      }
+    };
+\end{tikzpicture}

@@ -1,0 +1,210 @@
+\section{Test und Auswertung}\label{test}
+
+Das letzte Kapitel des Hauptteils soll nun die wichtigsten Verbesserungen aus Kapitel \ref{implementierung} im Anwendungskontext zeigen und evaluieren.
+
+\subsection{Übersicht der Testsysteme}
+
+Zunächst sollen die Testsysteme vorgestellt werden. Es geht bei der Analyse der Laufzeit hierbei nicht darum, die Hardwarekonfigurationen untereinander zu vergleichen, sondern um die Darstellung der durch das Batch-Processing eingeführten Skalierbarkeit. PC1 ist dabei der schnellste PC, gefolgt von PC2 und PC3, wobei letzterer der Konfiguration der Laborrechner am meisten ähnelt. Das in der Tabelle angegebene Jahr bezieht sich auf das Einführungsdatum der jeweiligen CPU, die den größten Einfluss auf die Berechnungsdauer hat. 
+
+Auf allen Computern ist Windows 10 in einer 64 Bit Version installiert. Außerdem wird Java sowohl beim \acrshort{jdk}, als auch bei der \acrshort{jre} in der 32 Bit Variante unter Version 1.7.0\_75 verwendet. Desweiteren wird MultiTextCompare immer über Eclipse selbst und nicht über eine ausführbare \acrshort{jar} gestartet. Um eine vollständige Auslastung der CPU sicherzustellen werden die Run Commands für das Programm so angepasst, dass bis zu 1 GB RAM verwendet werden kann. Zusätzlich werden die Vergleiche direkt nach dem Start der PCs ausgeführt ohne dass weitere Programme geöffnet werden.
+\begin{table}[!htb]
+\centering
+\begin{tabular}{|l||l|l|l|}
+\hline
+Hardwarekomponente & PC1      & PC2      & PC3      \\ \hline
+CPU &
+  \begin{tabular}[c]{@{}l@{}}Intel i9 10850k\\ (10c/20t)\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}Intel i7 7700HQ\\ (4c/8t)\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}Intel i5 4570\\ (4c/4t)\end{tabular} \\
+  \hline
+RAM &
+  \begin{tabular}[c]{@{}l@{}}32GB DDR4 \\ @ 2933 MHz\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}8GB DDR4\\ @ 2400 MHz\end{tabular} &
+  \begin{tabular}[c]{@{}l@{}}16GB DDR3\\ @ 1600 MHz\end{tabular} \\
+  \hline
+Festplatte         & NVMe SSD & NVMe SSD & SATA SSD \\ \hline
+Jahr \autocite{intelSpec}    & 2020 & 2017 & 2013 \\ \hline
+\end{tabular}
+\caption{Hardwarekonfigurationen der Testsysteme}
+\label{table:hardware}
+\end{table}
+
+\subsection{Laufzeitoptimierung durch Multithreading}
+
+Als erstes soll das Laufzeitverhalten beim Aufbau der Matrix untersucht werden. Dadurch dass MultiTextCompare aber für beliebige textbasierte Dateien konzipiert ist, lässt sich hier allerdings kein \glqq typischer\grqq{} Fall herstellen, da die Laufzeit sehr stark von den verglichenen Dateien und den Konfigurationsparametern abhängt. Deshalb soll hier nur erfasst werden, wie groß die Zeitersparnis im \emph{best case} ist.
+
+Für den ersten Durchlauf werden 80 reguläre Textdateien erstellt, deren Inhalt identisch ist. Beim Inhalt wird der Platzhaltertext \emph{Lorem ipsum} verwendet, welcher über den Line Compare-Vergleichsmodus ohne Zeilenmatching verglichen wird. Die Dateien sind 196KB groß, besitzen 611 Zeilen und die Zeichen pro Zeile variieren ca. zwischen 100 und 1700. Gemessen wird die Dauer des Vergleichs mit und ohne Multithreading und der Overhead, der durch das Verteilen und Zusammenfügen der gewichteten Vergleiche zusätzlich aufkommt. Dafür wird im Code mittels 
+\begin{minted}{java}
+System.nanoTime()
+\end{minted}
+
+der Start- bzw. Endzeitpunkt der Messung festgehalten und die Differenz der beiden Werte als Ergebnis notiert. Da \acrshort{io}-Zugriffe und das Scheduling des Betriebssystems Varianzen in die Laufzeit einbringen, werden die Ergebnisse bei einer Dauer von unter fünf Minuten über fünf Durchläufe gemittelt.
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+Testlauf            & PC1 & PC2 & PC3 \\ \hline
+Ohne Multithreading & 43min 11s  & 66min 29s  & 68min 37s  \\ \hline
+Mit Multithreading  & 4min 26s  & 20min 49s  & 18min 27s  \\ \hline
+Overhead            & 2,355s  & 6,241s  & 2,440s  \\ \hline
+\end{tabular}
+
+\caption{Messergebnisse für Multithreading}
+\label{table:multithreading}
+\end{table}
+
+Die Messergebnisse sind in Tabelle \ref{table:multithreading} dargestellt und zeigen wie erwartet, dass die Vergleiche ohne Multithreading auf PC1 am schnellsten und auf PC3 am langsamsten durchlaufen. Mit Multithreading ist PC3 aber schneller als PC2, was wahrscheinlich der besseren Kühlleistung des Systems geschuldet ist. Der Unterschied zwischen Vergleichen die multi- bzw. single-threaded sind ist zwar erheblich, allerdings korrespondiert dieser nicht unbedingt genau mit der Anzahl der verfügbaren Prozessorkerne. Bei PC1 mit zehn Prozessorkernen, ist eine Verbesserung um ungefähr den gleichen Faktor erkennbar. PC2 hat mit 4 physischen Kernen aber nur knapp eine Verbesserung um den Faktor 3,3. Da sich die einzelnen Prozessoren auch in der Leistung, z.B. der Taktrate oder der Instruktionen pro Takt, unterscheiden, sind erhebliche Unterschiede ohne Multithreading erkennbar. 
+
+Auch der entstandene Overhead durch die Verteilung und das Zusammenführen der Batches variiert zwischen den Systemen merkbar. Dieser Wert ist aber wenig signifikant wenn die mögliche Zeitersparnis durch das Multithreading betrachtet wird. Am meisten Zeit verbraucht dabei die Gewichtung der Vergleiche, für die alle Dateien der Vergleiche eingelesen werden müssen. Faktoren für die Abweichungen zwischen den Systemen können hier auch die Leistung der CPU, der Festplatten und das Scheduling des Betriebssystems sein, da keins der Systeme identische Komponenten beinhaltet. 
+
+Mit Multithreading entsteht also eine große Zeitersparnis, wenn die Systeme die nötige Hardware bieten. Hier gibt es aber auch noch weitere Möglichkeiten um die Wartezeit für den Benutzer zu verringern. Für zwei Zeilen mit vielen Zeichen entsteht bspw. das Problem, dass die Berechnung der Levenshtein-Distanz dort relativ teuer wird. Dort könnte es sinnvoll sein, die Strings in kleinere Sequenzen zu zerlegen und diese zu vergleichen. Ansonsten kann aber auch konfiguriert werden, dass Zeilen nur bis zu einer bestimmten Edit Distance verglichen werden und bei einer Überschreitung mit der Ähnlichkeit 0 bewertet werden. 
+
+\subsection{Strukturbasierte Vergleichsmodi}
+
+Die beiden neu eingeführten Vergleichsmodi für XML und JSON können für bestimmte Anwendungsfälle die Ähnlichkeitsbewertung von Dateien deutlich hinsichtlich ihrer Präzision verbessern. Da Knoten nur verglichen werden falls ihre eindeutigen Identifier übereinstimmen, sind false positives deutlich unwahrscheinlicher als bspw. beim Modus Line Compare, bei dem nicht gematchte Zeilen trotzdem miteinander verglichen werden und eine zufällige, wenn auch geringe, Ähnlichkeit haben können. Dadurch werden weniger, aber dafür tatsächlich strukturell ähnlichere Dateien in der Matrix als Ähnlich dargestellt und vor einer möglichen Auswahl der Diff gefiltert. Ein weiterer Vorteil kann im Bereich der Laufzeit entstehen, da ganze Teilbäume aufgrund von unterschiedlichen Bezeichnern evtl. nicht verglichen werden müssen. 
+
+Im Folgenden soll der strukturbasierte Vergleich für Dateien des Typs JSON angewandt und mit den Ergebnissen des Modus Line Compare verglichen werden. Dafür werden drei Beispielkonfigurationen einer fiktiven Rest-Schnittstelle verwendet, bei denen es sich um unterschiedliche Versionen handelt. Diese Konfigurationsdateien sind in Abb.\ref{fig:structCompJson} dargestellt und zwecks Übersicht relativ einfach gehalten. Datei V0 enthält die wenigsten Funktionalitäten, denn es fehlt im Vergleich zu V1 bspw. die Authentifizierung des zugreifenden Akteurs oder die Validierung der übergebenen JSON- oder XML-Inhalte. Der Unterschied von V1 zu V2 ist dafür deutlich kleiner, es ändert sich lediglich der Host von einer IP-Adresse zu einem tatsächlichen Domain-Namen und es kommt ein weiteres Dateiformat in Form von YAML für schreibende Anfragen dazu. 
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{.45\textwidth}
+  \begin{minted}[stripnl=false, fontsize=\small]{json}
+{
+    "api_version" : "v0",
+    "endpoint" : {
+        "host" : "192.168.0.165",
+        "port": 5000
+    },
+    "accept_format": [
+        "xml",
+        "json"
+    ],
+    "request_types": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+    ]
+}
+ 
+ 
+
+ 
+ 
+  \end{minted}
+  \caption{Konfiguration V0}
+  \label{fig:sub1}
+\end{subfigure}
+\begin{subfigure}[t]{.45\textwidth}
+\begin{minted}[stripnl=false, fontsize=\small]{json}
+{
+    "api_version" : "v1",
+    "endpoint" : {
+        "host" : "201.177.6.52",
+        "port": 5000
+    },
+    "accept_format": [
+        "xml",
+        "json"
+    ],
+    "authentication": {
+        "user": "$username",
+        "pass": "$password"
+    },
+    "enable_validation": true,
+    "request_types": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+    ]
+}
+\end{minted}
+  \caption{Konfiguration V1}
+  \label{fig:sub2}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+\begin{minted}[stripnl=false, fontsize=\small]{json}
+
+{
+  "api_version": "v2",
+  "endpoint": {
+    "host": "test@server.de",
+    "port": 5000
+  },
+  "accept_format": ["xml", "json", "yaml"],
+  "authentication": {
+    "user": "$username",
+    "pass": "$password"
+  },
+  "enable_validation": true,
+  "request_types": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+    ]
+}
+
+\end{minted}
+  \caption{Konfiguration V2}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Testdateien für strukturbasierten Vergleich}
+\label{fig:structCompJson}
+\end{figure}
+
+
+Beim strukturellen Vergleich werden nun zunächst die entsprechenden Dokumentbäume aufgestellt. Die maximale Anzahl an Knoten auf Ebene 1 beträgt sechs. Jeder dieser Knoten geht also für seinen Inhalt mit einem Gewicht von $\frac{1}{6}$ in die Gesamtähnlichkeit ein. Beim zeilenbasierten Vergleich ist hingegen die maximale Anzahl an Zeilen für das Gewicht entscheidend. Aus Platzgründen wurde die Darstellung der \emph{request\_types} in Abb. \ref{fig:structCompJson} mit einem Array-Eintrag pro Zeile gewählt, der JSON-Parser von Jackson schreibt allerdings das gesamte Array in eine Zeile weswegen sich eine maximale Zeilenanzahl von 14 und damit ein Gewicht von $\frac{1}{14}$ pro Zeile ergibt. Das heißt hier für die Bewertung, dass beim Vergleich von V0 und V1 die fehlende Authentifizierung im strukturellen Vergleich $\frac{1}{6}$ und im zeilenbasierten Vergleich $\frac{4}{14}$ der Gesamtähnlichkeit kostet. Dieser Effekt entsteht, da der zeilenbasierte Modus nicht auf die Struktur von JSON bzw. auch auf die Darstellung von JSON-Dateien durch den Parser achten kann. Die Ergebnisse aller Vergleiche sind in Tabelle \ref{table:vergleichsmodi} dargestellt. 
+
+\begin{table}[!htb]
+    \setlength{\tabcolsep}{8pt}
+    \begin{subtable}{.5\linewidth}
+      \centering
+        \begin{tabular}{|l|c|c|c|}
+        \hline
+        Ähnlichkeit            & V0 & V1 & V2 \\ \hline
+        V0 & 1,000  & 0,526  & 0,444  \\ \hline
+        V1  & 0,526  & 1,000  & 0,784  \\ \hline
+        V2 & 0,444  & 0,784  & 1,000  \\ \hline
+        \end{tabular}
+        \caption{struktureller Vergleich}
+    \end{subtable}%
+    \begin{subtable}{.5\linewidth}
+      \centering
+        \begin{tabular}{|l|c|c|c|}
+        \hline
+        Ähnlichkeit            & V0 & V1 & V2 \\ \hline
+        V0 & 1,000  & 0,618  & 0,594  \\ \hline
+        V1  & 0,618  & 1,000  & 0,954  \\ \hline
+        V2 & 0,594  & 0,954  & 1,000  \\ \hline
+        \end{tabular}
+        \caption{zeilenbasierter Vergleich}
+    \end{subtable} 
+    \caption{Vergleichsergebnisse für die Dateien aus Abb. \ref{fig:structCompJson}}
+    \label{table:vergleichsmodi}
+\end{table}
+
+Aus den Ergebnissen wird deutlich, dass die Vergleichsmodi die Ähnlichkeit zwar unterschiedlich, dafür aber ohne Widersprüche bewerten. Der Vergleich von V1 und V2 ist bei beiden Modi der ähnlichste, es folgen V1 und V0 und zuletzt kommen V0 und V2. Letzteres ist dadurch erklärbar, dass in V0 und V1 im Feld \emph{host} noch IP-Adressen stehen, die durch die Trennpunkte und die in beiden Adressen vorkommenden Zahlen eine höhere Ähnlichkeit haben als eine Adresse und ein Domain-Name.
+Der Hauptunterschied liegt also weniger in der Richtung der Bewertung, also ob der Wert näher an 0 oder näher an 1 ist, sondern in den absoluten Werten. Besonders die hohe Ähnlichkeit beim Vergleich von V1 und V2 ist beim zeilenbasierten Vergleich dadurch entstanden, dass die identischen Attributschlüssel eine Grundähnlichkeit für die Zeilen herstellen in denen sie vorkommen. Ebenfalls erhöht die identische Struktur die Ähnlichkeit, da Markup wie Klammern und Kommata in den gleichen Zeilen liegen und somit die Ähnlichkeit um bis zu $\frac{1}{14}$ anheben. Hier kommen also die Vorteile des strukturbasierten Modus zum tragen, bei dem Markup nicht für die Ähnlichkeit berücksichtigt wird und ausschließlich der Inhalt der Dateien bewertet wird. 
+
+In Tabelle \ref{table:structCompDiff} sind die Abzüge in der Ähnlichkeit für den Vergleich von V1 zu V2 dargestellt. Drei der Key-Value-Paare sind identisch und werden deshalb nicht aufgelistet. Für den Schlüssel \emph{api\_version} existieren zwei Zeichen und eins davon unterscheidet sich, wodurch ein erster Abzug von $\frac{1}{12}$ entsteht. Das Objekt \emph{endpoint} hat ein identisches Paar für den Port, nur der Hostname unterscheidet sich. Da die Hostnamen mit dem Punkt nur ein gemeinsames Zeichen haben, kommt hier ein großer Unterschied zu stande. Die 0,464 aus der Tabelle wird durch \[ \frac{1}{2} - \Big(\frac{1}{2} \cdot \big(1 -  \frac{13}{14}\big) \Big) = 0,464 \] errechnet und beschreibt den Unterschied der \emph{endpoint}-Objekte zwischen den beiden Dateien. In der Formel wird letztendlich nur die gewichtete Ähnlichkeit der Hostnamen von der Ähnlichkeit der Ports subtrahiert. Im Array \emph{accept\_format} fehlt in V1 noch der Eintrag für YAML und führt zu einem Abzug von $\frac{1}{3}$ im Kontext des Feldes bzw. $\frac{1}{18}$ im Kontext der Gesamtähnlichkeit. Werden nun alle Abzüge von der maximalen Ähnlichkeit 1 subtrahiert, entsteht der Wert aus Tabelle \ref{table:vergleichsmodi}(a) für den Vergleich von Datei V1 und V2.
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+Attributschlüssel   & Abzug \\ \hline
+api\_version          & \large$ \frac{1}{6} \cdot \frac{1}{2} = \frac{1}{12} $ \\ \hline
+endpoint             & \large$ \frac{1}{6} \, \cdot \, $\small $ 0,464 \approx 0,077 $ \\ \hline
+accept\_format       & \large$ \frac{1}{6} \cdot \frac{1}{3} = \frac{1}{18} $  \\ \hline
+\end{tabular}
+
+
+
+\caption{Bewertung der inhaltlichen Unterschiede für V1 und V2}
+\label{table:structCompDiff}
+\end{table}
+
+Es sei allerdings noch abschließend zu erwähnen, dass die hier gezeigten Dateien nur einen Anwendungsfall abdecken. Die Anwendung ist zwar nicht für einen bestimmten Anwendungsfall konzipiert, es kann im Rahmen dieser Arbeit aber nicht jeder mögliche Fall dargestellt und analysiert werden. 

@@ -1,0 +1,30 @@
+\begin{tikzpicture}[level distance=2.5cm,
+  level 1/.style={sibling distance=4.5cm},
+  level 2/.style={sibling distance=2.5cm},
+  level 3/.style={sibling distance=2.5cm},
+  element/.style={draw=black, fill=white, semithick, minimum size=10mm, align=center},
+  attribute/.style={ draw=red, fill=white, semithick, minimum size=7mm, align=center},
+  textnode/.style={ draw=black, fill=white, semithick, minimum size=7mm, align=center}]
+  \node [element](Root){Wurzel}
+    child {node [element]{Value}
+      edge from parent node[left,font = \Large, outer sep=.80cm]{ \( \frac{1}{4} \)}
+    }
+    child {node [element]{Objekt}
+        child {node [element]{Value} edge from parent node[left,font = \Large, outer sep=.30cm]{ \( \frac{1}{2} \)}}
+        child {node [element]{Array}
+            child {node [element]{Value} edge from parent node[left,font = \Large, outer sep=.30cm]{ \( \frac{1}{3} \)}}
+            child {node [element]{Value} edge from parent node[right,font = \Large, outer sep=0.5mm]{ \( \frac{1}{3} \)}}
+            child {node [element]{Value} edge from parent node[right,font = \Large, outer sep=.30cm]{ \( \frac{1}{3} \)}}
+        edge from parent node[right,font = \Large, outer sep=.30cm]{ \( \frac{1}{2} \)}}
+      edge from parent node[left,font = \Large, outer sep=.30cm]{ \( \frac{1}{4} \)}
+    }
+    child {node [element]{Value} edge from parent node[right,font = \Large, outer sep=0.3cm]{ \( \frac{1}{4} \)}}
+    child {node [element]{Array}
+      child {node [element]{Object}
+        child {node [element]{Value} edge from parent node[left,font = \Large, outer sep=.30cm]{ \( \frac{1}{2} \)}}
+        child {node [element]{Value} edge from parent node[right,font = \Large, outer sep=.30cm]{ \( \frac{1}{2} \)}}
+      edge from parent node[left,font = \Large, outer sep=.30cm]{ \( \frac{1}{2} \)}}
+      child {node [element]{Value} edge from parent node[right,font = \Large, outer sep=.30cm]{ \( \frac{1}{2} \)}}
+      edge from parent node[right,font = \Large, outer sep=.80cm]{ \( \frac{1}{4} \)}
+    };
+\end{tikzpicture}

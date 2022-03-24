@@ -1,0 +1,194 @@
+\section{Implementierung}\label{implementierung}
+
+In diesem Kapitel werden die in \ref{zielsetzung} geplanten Verbesserungen an MultiTextCompare durchgeführt und dargestellt. Angegebene Codestücke sind zwecks Lesbarkeit teilweise auf die relevantesten Zeilen gekürzt.
+
+\subsection{Verbesserung des Zeilenmatchings}\label{verbesserungMatching}
+
+Textbasierte Dateien können inhaltlich identisch sein, ohne dass sie exakt gleich aussehen. Sind zwei Dateien inhaltlich identisch aber um eine Zeile verschoben, würden sie von der Software als sehr unterschiedlich bewertet werden. Daher existiert die Matching-Komponente, die sicherstellt dass gleiche oder ähnliche Zeilen erkannt werden, und in der Diff-Anzeige im gleichen Zeilenindex stehen.
+
+Diese Eigenschaft ist daher unerlässlich für den Diff-Prozess innerhalb der Software. Im Kontext der Laufzeit, ist sie aber sehr kostspielig weshalb Maßnahmen notwendig sind, um diese zu senken. Dafür wird hier zunächst die ursprüngliche Funktionsweise in Version 1.0 zusammengefasst dargestellt.
+
+\subsubsection{Optimierung des Matching-Algorithmus}
+
+Das Matching kann in zwei Teilprobleme zerlegt werden. Auf der einen Seite existiert die Matcherkennung, bei der festgelegt wird ob zwei Zeilen überhaupt gematcht werden können. Auf der anderen Seite gibt es noch das Alignment, also die Sicherstellung davon, dass alle Zeilen nach dem Matching korrekt dargestellt werden können. Im Folgenden wird nur auf den ersten Aspekt eingegangen, da dieser die hauptsächliche Funktionalität darstellt.
+
+Um für zwei Dateien A und B alle Matches zu ermitteln, wird zunächst die Datei mit weniger Zeilen als Referenzdatei festgelegt. Dies sei ab jetzt Datei A. In Version 1.0 wurde für jede Zeile von A jede Zeile von B nach einem Match durchsucht. Die Kriterien für ein Match waren dabei, dass sich die Zeilen nach Gleichung (\ref{eq:matchat}) ähnlich genug sind und dass keine der infrage kommenden Zeilen bereits gematcht wurde. Zudem sind Matches \glqq über Kreuz\grqq{} ausgeschlossen. Das heißt, dass die Matchindices für ein potenzielles Match immer größer sein mussten, als die des letzten erfassten Match. Der zugehörige Code ist in Codeabschnitt \ref{code:matchingV1} dargestellt.
+
+\begin{listing}
+\begin{minted}
+[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+bgcolor=white,
+fontsize=\footnotesize,
+linenos
+]{java}
+
+String ref = "", comp = "";
+int lastMatchedIndex = 0;
+// Schaue für jede Zeile der linken Datei
+for (int i = 0; i < lineCountLeft; i++) {
+	reference = leftFile.get(i);
+	// ob es in der rechten Datei ein Match gibt
+	for (int j = 0; j < lineCountRight; j++) {
+		comp = rightFile.get(j);
+		if (matches(reference, comp) // falls Zeilen ähnlich genug
+				&& j >= lastMatchedIndex // falls Match nicht über Kreuz
+				&& notMatchedYet(i, j)) { // falls noch nicht gematcht
+			lastMatchedIndex = j;
+			// Speichere Match
+			matches.add(new IMatchImpl(i, j, reference, comp));
+			// Gehe in die nächste Zeile der Referenzdatei
+			break;
+		}
+
+	}
+}
+\end{minted}
+\caption{Matching in V1.0}
+\label{code:matchingV1}
+\end{listing}
+
+
+Besonders ausschlaggebend für die Laufzeit ist dabei die Feststellung der Ähnlichkeit. Für eine Optimierung sollte die Anzahl dieser Feststellungen also, wo möglich, reduziert werden.
+
+Für den Fall, dass in beiden Dateien kein einziges Match existiert, würde jede Zeile von A mit jeder Zeile von B verglichen werden. Dieses Szenario enthält die größtmögliche Anzahl an Vergleichen und stellt daher den worst case dar. Um hier die Laufzeit zu verbessern, wird ein \textit{Lookahead}-Limit eingeführt. Das bedeutet, dass für jede Zeile der Referenzdatei $A_i$ eine maximale Suchreichweite abhängig vom aktuellen Zeilenindex $i$ festgelegt wird.
+Als Beispiel würde eine Zeile $A_5$ mit einem Lookahead-Wert von 10 mit jeder Zeile $B_{0...15}$ verglichen werden sofern kein Match für $B_{0...15}$ existiert und Datei B mindestens 15 Zeilen lang ist. Ist Datei B kürzer, so werden alle Zeilen bis zum Dateiende verglichen. 
+
+Auch wenn Matches existieren, kann ein solches Lookehead-Limit Vorteile haben. Für größere Dateien kann es passieren, dass ein Match erst 50-100 Zeilen nach dem letzten gefunden wird. Dies führt dann zu genauso vielen Leerzeilen im Alignment-Prozess, was die Lesbarkeit für den Benutzer beeinträchtigen kann. Da die Eingabedateien vor dem Vergleichen nicht bekannt sind, wird dem Benutzer die Möglichkeit gegeben, den Schwellwert selbst nach Bedarf anzupassen.
+
+Eine weitere Auffäligkeit im Quellcode-Abschnitt \ref{code:matchingV1} ist, dass die Indexvariable j, unabhängig davon ob ein Match gefunden wird oder nicht, immer bei 0 anfängt. Dabei würde es genügen, wenn nach einem Match $M_{i,j}$ der Vergleich erst bei $i = i + 1$ und $j = j + 1$ fortgesetzt werden würde. So müsste auch nicht mehr geprüft werden ob ein Match über Kreuz ist oder ob es bereits ein Match mit den aktuellen Indices gibt. Diese Optimierungen sind im Quellcode \ref{code:lookahead} dargestellt
+
+%TODO: PERFORMANCE UNTERSCHIED BESCHREIBEN%
+
+\begin{listing}[!h]
+\begin{minted}
+[
+frame=lines,
+framesep=2mm,
+baselinestretch=1.2,
+bgcolor=white,
+fontsize=\footnotesize,
+linenos
+]{java}
+
+String ref = "", comp = "";
+int lowestPossibleIndex = 0;
+// Schaue für jede Zeile der linken Datei
+for (int i = 0; i < lineCountLeft; i++) {
+	reference = leftFile.get(i);
+	int maxSearchIndex = i + LOOKAHEAD + 1;
+	if (maxSearchIndex > lineCountRight) {
+		maxSearchIndex = lineCountRight;
+        }
+	// ob es in der rechten Datei ein Match gibt
+	for (int j = lowestPossibleIndex; j < maxSearchIndex; j++) {
+		comp = rightFile.get(j);
+		if (matches(reference, comp)) { // falls Zeilen ähnlich genug
+			lowestPossibleIndex = j + 1;
+			// Speichere Match
+			matches.add(new IMatchImpl(i, j, reference, comp));
+			// Gehe in die nächste Zeile der Referenzdatei
+			break;
+		}
+	}
+}
+\end{minted}
+\caption{Aktualisiertes Matching mit Lookahead}
+\label{code:lookahead}
+\end{listing}
+
+\subsubsection{Verbesserung der Funktionsweise}\label{bestMatch}
+
+Trotz Optimierung gibt es noch einen weiteren Aspekt der verbessert werden kann. Aktuell wird die Suche nach Matches nach dem ersten Match beendet. So entstehen Situationen, bei denen mehrere ähnliche Zeilen nah beieinander existieren und ein Match der ersten möglichen Zeile nicht die beste Option wäre.
+
+\begin{figure}
+\centering
+\begin{subfigure}{.45\textwidth}
+  \begin{minted}{json}
+{
+  "phones" : [ {
+	  "brand": "Apple",
+	  "name": "IPhone 12"
+  },
+  {
+      "brand": "Apple",
+	  "name": "IPhone 13"
+  } ]
+}
+  \end{minted}
+  \caption{Beispiel-JSON 1}
+  \label{fig:sub1}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+\begin{minted}[stripnl=false]{json}
+{
+  "phones" : [ {
+	  "brand": "Apple",
+	  "name": "IPhone 13"
+  } ]
+}
+
+
+
+
+\end{minted}
+  \caption{Beispiel-JSON 2}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Zwei ähnliche JSON-Dateien}
+\label{fig:bestMatchJSON}
+\end{figure}
+
+In Abb. \ref{fig:bestMatchJSON} sind zwei JSON-Dateien abgebildet, bei denen dieses Szenario zutrifft. In der Standardeinstellung würden, bis auf die schließenden Klammern, keine Zeilen der zweiten Datei verschoben werden obwohl in Datei 1 ein identischer Eintrag existiert. Zwar könnte der Wert für $x$ aus Gleichung (\ref{eq:matchat}) auf 1 erhöht werden, allerdings würden dadurch nicht-identische aber ähnliche Zeilen für das Matching ignoriert werden falls die Dateien weitere Einträge hätten.
+
+Die Lösung für dieses Problems wird durch einen \textit{Best-Match} Algorithmus gelöst. Innerhalb des Lookahead-Limits werden alle potenziellen Matches in einer zusätzlichen Liste gesammelt. Mit jedem potenziellen Match wird zusätzlich die \acrshort{llcs} mitgespeichert. Nachdem alle nötigen Zeilen verglichen wurden, wird die Kandidatenliste nach der durch die maximale Länge der verglichenen Strings geteilten LLCS sortiert und das Match verwendet, welches dort den höchsten Wert besitzt. Diese Normierung führt u.\,a. dazu, dass ähnlichere Matches trotz gleicher \acrshort{llcs} bevorzugt werden. Ein Beispiel dafür wäre der Vergleich der Zeilenpaare (\emph{Kunde}, \emph{Kunden}) und (\emph{Kunde}, \emph{Kundennummer}), bei denen die LCS für beide Paare 5 ist, aber die Edit-Distance für das zweite Paar mit 7 deutlich größer ausfällt als die des ersten Paares mit Distanz 1. Dadurch ergäbe sich für Paar 1 ein normierter Ähnlichkeitswert von ca. 0,83 und für Paar 2 ein Wert von nur 0,42, weswegen Paar 1 als Match bevorzugt werden würde. Sollte dieser Wert für zwei potenzielle Matches gleich sein, wird danach entschieden ob eins der Matches direkt auf ein vorangegangenes Match folgt, um möglichst nach verschobenen Blöcken zu suchen. Existiert kein direkter Vorgänger und der Ähnlichkeitswert ist gleich, wird das Match mit geringerem Index verwendet. Das Ergebnis innerhalb der Software ist in Abb. \ref{fig:bestMatchResult} dargestellt. Nun werden alle verfügbaren Zeilen der rechten Datei auch in der linken Datei als existent dargestellt. Das Ergebnis zeigt jedoch auch eine Limitation des Verfahrens. Da es nicht auf die Syntax der unterliegenden Dateiformate eingeht, kann nicht darauf geachtet werden ob ganze Objekte oder Array-Einträge verschoben wurden. Für den hier beschriebenen Fall führt diese Limitation wiederum zu keinen Abzügen in der Genauigkeit bei der Bewertung durch den \emph{Line Compare}-Vergleichsmodus.
+
+\begin{figure}[]
+    \centering
+    \includegraphics[width=\textwidth]{images/Best Match updated.png}
+    \caption{Resultat des Best-Match Verfahrens}
+    \label{fig:bestMatchResult}
+\end{figure}
+
+\newpage
+\input{Chapters/Implementierung/ueberarbeitungVergleiche}
+
+\newpage
+\subsection{Batch-Processing für Vergleiche}
+Dem Benutzer ist es möglich, beliebig viele Dateien für den Vergleich miteinander auszuwählen. Da die Software in der Version 1.0 für die Vergleiche single-threaded war, konnte dies je nach Dateimengen- und größen zu langen Laufzeiten führen. Die in \ref{Levenshtein-Distanz} beschriebene Levenshtein-Distanz hat in ihrer Berechnung für zwei Strings $S_1, S_2$ mit der Länge $m$ und $n$ in der verwendeten Implementierung von Apache Commons eine Laufzeit von $\mathcal{O}(m \cdot n)$ \autocite{levenshteinLaufzeit}, was die Laufzeit für lange Zeileneinträge drastisch erhöht.
+
+\begin{equation}
+    N = \sum_{k = 2}^{n} k-1 = \sum_{k=1}^{n-1} k = \frac{n ^ 2 -n}{2} \ ,mit \ n\in\mathbb{N}_{\geq2}
+    \label{eq:vergleichsanzahl}
+\end{equation}
+
+In Gleichung (\ref{eq:vergleichsanzahl}) ist beschrieben, wie viele Vergleiche $N$ für $n$ vom Benutzer ausgewählte Dateien entstehen. Das Minimum an Dateien ist hierbei 2, da es in dem Kontext der Software keinen Mehrwert hat eine Datei mit sich selbst zu vergleichen. Was jedoch auffällt, ist wie stark die Anzahl der zu berechnenden Vergleiche mit der Anzahl der importierten Dateien wächst.
+
+\begin{figure}[!htb]
+\centering
+\input{Graphs/vergleichsSkalierung}
+\caption{Skalierung der Vergleichsanzahl}
+\label{fig:vergleichsskalierung}
+\end{figure}
+
+Dies ist für relativ geringe Anzahlen an Dateien in Abb. \ref{fig:vergleichsskalierung} dargestellt. Dadurch entsteht die Frage, wie die Laufzeit der Vergleiche reduziert werden kann, ohne die Genauigkeit der Ergebnisse zu verschlechtern.
+
+Eine Möglichkeit um die Laufzeit drastisch zu verringern, wäre eine Parallelisierung der Vergleiche. So bekäme jeder Prozessorkern (oder jeder Thread bei Mutlithread-Prozessoren) einen Batch (Stapel) an Vergleichen zugewiesen, den er bearbeiten kann. Zusätzlich sollte sicher gestellt werden, dass jeder Thread ungefähr gleich stark belastet wird um die CPU möglichst gleichmäßig auszulasten.
+
+Für die Umsetzung wird zunächst die Java-Klasse \emph{IComparison} aus der \emph{Entity}-Komponente erweitert. Objekte dieser Klasse speichern Referenzen auf die verglichenen Dateien und den Ähnlichkeitswert eines Vergleichs. Dazu kommt nun ein Feld für die ID und ein Feld für das Gewicht des Vergleichs. Die ID ist notwendig, da die Objekte nach ihrem Gewicht auf die verfügbaren Threads verteilt werden und nach dem Vergleich aller Dateien wieder in die ursprünglichen Reihenfolge zusammengefügt werden müssen. Das Gewicht wird hierbei durch die Gesamtzahl der Zeichen dargestellt. 
+
+Zwar beachtet dieses Gewicht nicht, ob die Zeichen gleichmäßig auf die Zeilen verteilt sind, jedoch approximiert es die mittlere Berechnungsdauer. Sollten Zeilen mit besonders vielen Zeichen in den verglichenen Dateien existieren, besteht die Möglichkeit für den Benutzer eine Obergrenze für die Edit-Distance anzugeben, was die Laufzeit in diesem Fall deutlich verringert.
+
+Um die gewichteten Vergleiche nun auf die verfügbaren Threads zu verteilen, werden sie zunächst absteigend nach ihrem Gewicht sortiert. Danach wird mittels der Codezeile
+\begin{minted}{java}
+Runtime.getRuntime().availableProcessors();
+\end{minted}
+die Anzahl der Threads und damit die Anzahl der zu befüllenden Batches ermittelt. Um die Vergleiche auf die Batches zu verteilen wird das \emph{Round-Robin}-Verfahren verwendet, bei dem alle Batches nacheinander einen Vergleich zugewiesen bekommen bis alle Vergleiche verteilt sind. 
+
+Um nun jeden Batch auf einem eigenen Thread zu berechnen, wird sobald der Benutzer den Vergleich startet im jeweiligen Event-Handler ein SwingWorker erstellt. Innerhalb dessen \emph{doInBackground()}-Methode wird wiederum ein \emph{ExecutorService} angelegt. Ein ExecutorService liefert Methoden, mit denen Threads und Threadgruppen synchronisiert gestartet bzw. gestoppt werden können \autocite{executorService}. Für das Interface ExecutorService existieren mehrere Implementierungen wobei hier die Implementierung \emph{newFixedThreadPool}(\emph{int} nThreads) verwendet wird. Der Übergabeparameter \emph{nThreads} steht dabei für die Anzahl an Threads, die innerhalb des ExecutorService verwendet werden können. Diese Anzahl wird ebenfalls auf die Anzahl der verfügbaren Prozessorthreads festgesetzt um jedem Thread genau einen Batch zuzuweisen. 
+
+Die \emph{shutdown()}-Funktion des ExecutorServices lässt alle zuvor erstellten Threads zu Ende laufen und baut diese anschließend ab. In der \emph{done()}-Methode des SwingWorkers werden dann alle Batches wieder in eine einzige, nach IDs sortierte, Liste vereinigt und für die Anzeige freigegeben.
+
+\input{Chapters/Implementierung/UI_chapter}

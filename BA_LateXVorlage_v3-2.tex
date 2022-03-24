@@ -1,0 +1,309 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% LaTeX-Vorlage für Abschlussarbeiten                                       %%
+%% (TH Köln -Campus Gummersbach, Fak. 10)                                    %%
+%%                                                                           %%
+%% Gemäß dem Merkblatt zur Anfertigung von Projekt-, Bachelor-, Master- und  %%
+%% Diplomarbeiten der Fakultät 10 von Frau Prof. Dr. Halfmann &              %%
+%% Herr Prof. Dr. Rühmann (Version vom 27.01.2008)                           %%
+%%                                                                           %%                                                                            
+%% Bitte sprechen Sie unbedingt mit Ihrer Betreuerin bzw. Ihrem Betreuer     %%
+%% bezüglich der Ausgestaltung Ihrer Arbeit!                                 %%
+%%                                                                           %%
+%%                                                                           %%
+%% MERKKASTEN IN DIESER VORLAGE:                                             %%
+%% In dieser Vorlage finden Sie Merkkasten, die Ihnen Informationen          %%
+%% zu bestimmten, formalen Aspekten geben. Sprechen Sie immer auch mit       %% 
+%% Ihrer Betreuerin bzw. Ihrem Betreuer dazu an.                             %%                       
+%% Für die eigene Verwendung der Vorlage entfernen oder kommentieren Sie die %%
+%% Merkkasten. Die betreffenden Bereiche für die Merkkasten in der Vorlage   %%
+%% sind wie folgt kommentiert: <MERKKASTEN> ... </MERKKASTEN>.               %%                            %%                                                                           %%
+%%                                                                           %%
+%% LIZENZ:                                                                   %%
+%% Diese Vorlage darf nicht kommerziell verbreitet                           %%
+%% werden. Eine nicht-kommerzielle Weitergabe ist                            %% 
+%% gestattet.                                                                %%
+%%                                                                           %%
+%% Von Ludger Schönfeld, M. Sc.,
+%% 2014-2017                            %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% HEADER                                  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,12pt,oneside]{article}
+% Optionen:
+% - a4paper => DIN A4-Format
+% - 12pt    => Schriftgröße (weitere  
+%              grundlegende Fontgrößen: 10pt, 11pt)
+% - oneside => Einseitiger Druck
+
+%% Verwendete Pakete:
+\usepackage[ngerman]{babel} % für die deutsche Sprache
+\usepackage{caption} % Für schönere Bildunterschriften
+\usepackage[T1]{fontenc} % Schriftkodierung (Für Sonderzeichen u.a.)
+\usepackage[utf8]{inputenc} % Für die direkte Eingabe von Umlauten im Editor u.a.
+\usepackage{fancyhdr} % Für Kopf- und Fußzeilen
+\usepackage{lscape} % Für Querformat
+% !TeX spellcheck = de_DE
+%% Schriften (Beispiele)
+%% Weitere LaTeX-Schriften im "LaTeX Font Catalogue"
+%% unter: http://www.tug.dk/FontCatalogue/.
+%% ACHTUNG: Ggf. müssen Schriften noch installiert 
+%% werden!
+
+% Serifen-Schriften:
+\usepackage{lmodern} % Schriftart "Latin Modern"
+%\usepackage{garamond} % Schriftart "Garamond"
+
+%Sans Serif-Schriften:
+%\usepackage[scaled]{uarial}
+%\usepackage[scaled]{helvet}
+%%--------------
+\usepackage[normalem]{ulem} % Für das Unterstreichen von Text z.B. mit \uline{}
+\usepackage[left=3cm,right=2cm,top=1.5cm,bottom=1cm,
+textheight=245mm,textwidth=160mm,includeheadfoot,headsep=1cm,
+footskip=1cm,headheight=14.599pt]{geometry} % Einrichtung der Seite 
+
+\usepackage{graphicx} % Zum Laden von Graphiken
+% INFO: Graphiken einbinden
+%
+% \includegraphics[scale=1.00]{dateiname}
+%
+% => Ausgabeformat: PDF-Dokument:
+%    Es können die folgenden (Graphik-)formate eingebunden
+%    werden: .jpg, .png, .pdf, .mps
+% 
+% => Ausgabeformat: DVI/PS:
+%    Folgende (Graphik-)formate werden unterstützt:
+%    .eps, .ps, .bmp, .pict, .pntg
+\usepackage{epstopdf}
+
+% Pakete für Tabellen
+\usepackage{tabularx} % Einfache Tabellen
+\usepackage{longtable} % Tabellen als Gleitobjekte (für die Aufteilung bei langen 
+ %Tabellen über mehrere Seiten)
+\usepackage{multirow} % Für das Verbinden von Zeilen innerhalb einer Tabelle mit
+ % \multirow{anzahl}{*}{Text}
+
+% (Zusatz-)Pakete für Formeln
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+
+\usepackage{setspace} % Paket zum Setzen des Zeilenabstandes
+% INFO: Zeilenabstand setzen:
+%
+% Befehle:
+% - \singlespacing  => 1-zeilig (Standard)
+% - \onehalfspacing => 1,5-zeilig
+% - \doublespacing  => 2-zeilig 
+\onehalfspacing % Zeilenabstand auf 1,5-zeilig setzen
+
+% Farbboxen (für die Merkkästen in dieser Vorlage):
+\usepackage{tcolorbox}
+\tcbset{colback=white,colframe=orange,
+        fonttitle=\bfseries}
+
+\usepackage[colorlinks,pdfpagelabels,pdfstartview=FitH,
+bookmarksopen=true,bookmarksnumbered=true,linkcolor=black,
+plainpages=false,hypertexnames=false,citecolor=black]{hyperref} % Für Verlinkungen
+% INFO: Verlinkungen mit dem hyperref-Paket:
+%
+% Die Angabe von URLs mit dem Befehl \url{} erlaubt einen
+% gesonderten Umgang mit Weblinks. Denn die Links werden verlinkt.
+% Auch erfolgt automatisch am Zeilenende ein Umbruch des Links.
+% Es ist auch nicht erforderlich, Sonderzeichen in der URL manuell zu 
+% entschärfen.
+%
+% TIPP: Sollte ein Umbuch bei einem Link nicht automatisch erfolgen, so kann
+% das daran liegen, dass ein/mehrere Zeichen zusätzlich angegeben werden müssen,
+% an dem der Link umbrochen werden kann.
+% Dies kann mit folgendem Befehl erfolgen (Beispiel):
+% \renewcommand*\UrlBreaks{\do-\do_}
+
+% Das Paket "biblatex" für autom. 
+% Literaturverzeichnisse:
+%\usepackage{csquotes} % Für sprachangepasste Anführungszeichen
+%\usepackage[backend=bibtex,style=alphabetic]  
+%           {biblatex}
+%\addbibresource{bib/literatur.bib}           
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DOKUMENT                                %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+  % Unbeschriftetes Vorblatt (Leere Seite)
+  \pagestyle{empty} % Seite ohne Kopf- und Fußzeilen
+ % \input{leereSeite} % Ausgelagerte LaTeX-Datei (hier: leereSeite.tex) einbinden
+  
+  % Deckblatt
+  \pagestyle{empty}
+  \begin{titlepage}
+    \includegraphics[scale=1.00]{Sources/logo_TH-Koeln_CMYK_22pt}\\
+    \begin{center}
+      \Large
+      Technische Hochschule Köln\\
+      Fakultät für Informations-, Medien- und Elektrotechnik (F07)\\
+      \hrule\par\rule{0pt}{2cm} % Horizontale Trennlinie  mit 2 cm Abtand nach unten erzeugen
+      \LARGE
+      \textsc{B A C H E L O R A R B E I T}\\
+      \vspace{1cm} % Vertikaler Abstand von 1cm erzeugen
+      \huge
+      Entwicklung eines Tools zum Vergleich textbasierter Dateien mit graphischer Anzeige der Unterschiede\\
+      \vspace{1.5cm}
+      \large
+      Vorgelegt an der TH Köln\\
+      Campus Deutz\\
+      im Studiengang\\
+      Technische Informatik B.Sc.\\ 
+      \vspace{1.0cm}
+      ausgearbeitet von:\\
+      \textsc{Allen Kletinitch}\\
+      (Matrikelnummer: 11124870)\\
+      \vspace{1.5cm}
+      \begin{tabular}{ll} % Einfache Tabelle ohne Rahmen, mit 2 Spalten erzeugen
+          \textbf{Erster Prüfer:} & Prof. Dr. Rainer Bartz \\
+          \textbf{Zweiter Prüfer:} & Prof. Dr. René Wörzberger \\
+      \end{tabular}
+      \vspace{1.0cm}
+      \newline Juli 2021\\
+    \end{center}    
+  \end{titlepage}
+  
+  \newpage
+  
+  % Abstract (ACHTUNG: Abweichung zur Reihenfolge im Merkblatt!)
+
+  \include{Chapters/Abstract}
+
+  \newpage
+  
+  % Inhaltsverzeichnis
+  \tableofcontents
+  
+  \newpage
+  \pagestyle{fancy} % Kopf- und Fußzeilen aktivieren (=> Paket "fancyhdr")
+ 
+  % Abbildungsverzeichnis  
+  % INFO: Abbildung einbinden (Beispiel):
+  %  \begin{figure}[h!]
+  %    \centering
+  %    \includegraphics[scale=1.00]{Pfad zum Bild}\\
+  %    \caption{Bildunterschrift} 
+  %    \label{Marke zum Referenzieren auf die Abbildung}
+  %  \end{figure}
+  \section*{Abbildungsverzeichnis}
+  \addcontentsline{toc}{section}{Abbildungsverzeichnis} % Manuellen Eintrag im Inhaltsverzeichnis erzeugen
+  \renewcommand{\listfigurename}{} % Name des Abbildungsverzeichnisses ändern
+  \thispagestyle{empty}
+  \listoffigures
+  
+  \newpage
+  
+  % Tabellenverzeichnis
+  %\addcontentsline{toc}{section}{Tabellenverzeichnis}
+  %\listoftables
+  
+  %\newpage
+  
+  % Hauptteil des Dokuments
+  % TIPP: Jedes Kapitel oder jeder Abschnitt in eine eigene
+  % LaTeX-Datei (.tex) auslagern.
+  % Einbinden der ausgelagerten Dateien in diese Hauptdatei, erfolgt 
+  % mittels folgendem Befehl (Beispiel):
+  % beispiel.tex => \input{beispiel}
+  \newpage
+  \include{Chapters/Einleitung}
+  % INFO: Querverweise auf Gliederungselemente, Abbildungen 
+  %       & Tabellen setzen:
+  %
+  % Voraussetzung: Gesetzte Referenzmarke mit dem Befehl: \label{marke}
+  % 
+  % Referenzierung erfolgt dann mittels dem Befehl:
+  % \ref{marke}
+  
+  %\section{Einleitung}\label{kap_einleitung}  
+   %\input{} 
+   TEXT FOLGT...
+   
+  \newpage  
+  \section{Grundlagen}\label{kap_grundlagen}  
+    TEXT FOLGT...
+   
+    \subsection{Unterabschnitt von Grundlagen}\label{subsec_UabsGrundl}
+     %\input{}
+     TEXT FOLGT... 
+  
+  
+  \newpage 
+  \section{Zusammenfassung und Ausblick}\label{kap_zusammfAusbl}  
+   %\input{}
+   TEXT FOLGT...
+  % Literaturverzeichnis
+   % INFO: Referenzieren auf das Literaturverzeichnis:
+   %
+   % Befehl: \cite{refmarke}
+   % 
+   % "refmarke" ist die Angabe in den geschweiften Klammern bei 
+   % \bibitem[]{refmarke}. 
+   \newpage
+    \thispagestyle{empty}
+   \section{Quellenverzeichnis}
+     \subsection{Literatur}
+     \renewcommand{\refname}{} % Literaturverzeichnis ohne Bezeichnung
+     % Variante 1: einfaches, manuelles 
+     % Literaturverzeichnis
+     \begin{thebibliography}{SW11} % 2. {...} => Hier die größte /breiteste Nummer (z.B. 99) oder Kurzbeleg angeben.
+       \bibitem[SW11]{SW11} Stickel-Wolf, Christine; Wolf, Joachim (2011): Wissenschaftliches Lernen und Lerntechniken. Erfolgreich studieren–-gewusst wie!. Wiesbaden: Gabler. 
+     \end{thebibliography} 
+          
+     \subsection{Internetquellen}
+     \begin{thebibliography}{HR08} % 2. {...} => Hier die größte/breiteste Nummer (z.B. 99) oder Kurzbeleg angeben.
+       \bibitem[BBoJ]{BBoJ}Bertelsmeier, Birgit (o. J.): Tipps zum Schrei\-b\-en ei\-n\-er Ab\-sch\-luss\-ar\-beit. Fach\-hoch\-schu\-le Köln-Campus Gummersbach, Institut für Informatik. \url{http://lwibs01.gm.fh-koeln.de/blogs/bertelsmeier/files/2008/05/abschlussarbeitsbetreuung.pdf} (29.10.2013).
+        \bibitem[HR08]{HR08} Halfmann, Marion; Rühmann, Hans (2008): Merkblatt zur Anfertigung von Projekt-, Bachelor-, Master- und Diplomarbeiten der Fakultät 10. Fachhochschule Köln-Campus Gummersbach.\url{http://www.f10.fh-koeln.de/imperia/md/content/pdfs/studium/tipps/anleitungda270108.pdf} (29.10.2013).
+     \end{thebibliography} 
+  
+  % INFO: Biblatex -Ausgabe des  
+  % Literaturverzeichnisses (Beispiele):   
+  % - \printbibliography => Ausgabe ALLER 
+  %   Einträge
+  % - \printbibliography[nottype=online]
+  %   => Ausgabe der Einträge, bis auf die
+  %      "Online"-Einträge
+  % - \printbibliography[type=online]     
+  %   => Ausgabe nur der "Online"-Einträge  
+   %\printbibliography
+
+  % Anhang
+  \newpage
+  \setcounter{section}{0} % Nummerierung der Gliederungsebene "section" auf 0 setzen
+  \renewcommand*\thesection{\Alph{section}} % Nummerierungsart für die Gliederungsebene "section" 
+  % auf Großbuchstaben setzen
+  \section{Anhang}\label{anhang}
+    \subsection{Unterabschnitt von Anhang}\label{subsec_UabsAnhang}
+    TEXT FOLGT...
+  
+  \newpage
+  
+ % Erklärung über die selbständige Abfassung der Arbeit  
+ \pagestyle{empty}
+ \section*{Erklärung über die selbständige\\Abfassung der Arbeit} % \section*{...}: das *-Symbol erlaubt, dass dieser
+ % Gliederungspunkt nicht ins Inhaltsverzeichnis aufgenommen wird
+ \addcontentsline{toc}{section}{Erklärung über die selbständige Abfassung der Arbeit}
+ Ich erkläre an Eides statt, dass ich die vorgelegte Abschlussarbeit selbständig und
+ ohne fremde Hilfe verfasst, andere als die angegebenen Quellen und Hilfsmittel
+ nicht benutzt und die den benutzten Quellen wörtlich oder inhaltlich entnommenen
+ Stellen als solche kenntlich gemacht habe.\\\\
+\begin{tabular}{cp{7cm}}
+    & \\ 
+    & \\ \hline
+  \small (Ort, Datum, Unterschrift) & \normalsize \\
+  \end{tabular} 
+   
+\newpage
+% Unbeschriftetes Abschlussblatt (Leere Seite)
+\thispagestyle{empty}
+\input{leereSeite}
+    
+\end{document}
+

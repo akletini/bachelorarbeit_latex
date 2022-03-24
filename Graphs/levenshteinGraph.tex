@@ -1,0 +1,204 @@
+%Original
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm}]
+\node[roundnode] (g) {G};
+\node[roundnode] (e1) [right=of g] {e};
+\node[roundnode] (s) [right=of e1] {s};
+\node[roundnode] (c) [right=of s] {c};
+\node[roundnode] (h) [right=of c] {h};
+\node[roundnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (h.west);
+\draw[->] (h.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[roundnode] (e1) [right=of g] {e};
+\node[roundnode] (s) [right=of e1] {s};
+\node[roundnode] (c) [right=of s] {c};
+\node[roundnode] (h) [right=of c] {h};
+\node[roundnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (h.west);
+\draw[->] (h.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[roundnode] (s) [right=of e1] {s};
+\node[roundnode] (c) [right=of s] {c};
+\node[roundnode] (h) [right=of c] {h};
+\node[roundnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (h.west);
+\draw[->] (h.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[replacenode] (s) [right=of e1] {b};
+\node[roundnode] (c) [right=of s] {c};
+\node[roundnode] (h) [right=of c] {h};
+\node[roundnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (h.west);
+\draw[->] (h.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[replacenode] (s) [right=of e1] {b};
+\node[replacenode] (c) [right=of s] {i};
+\node[roundnode] (h) [right=of c] {h};
+\node[roundnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (h.west);
+\draw[->] (h.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm},
+deletenode/.style={circle, draw=red, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[replacenode] (s) [right=of e1] {b};
+\node[replacenode] (c) [right=of s] {i};
+\node[deletenode] (h) [right=of c] {h};
+\node[roundnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (h.west);
+\draw[->] (h.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm},
+deletenode/.style={circle, draw=red, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[replacenode] (s) [right=of e1] {b};
+\node[replacenode] (c) [right=of s] {i};
+\node[currentnode] (e2) [right=of h] {e};
+\node[roundnode] (n) [right=of e2] {n};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm},
+deletenode/.style={circle, draw=red, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[replacenode] (s) [right=of e1] {b};
+\node[replacenode] (c) [right=of s] {i};
+\node[currentnode] (e2) [right=of h] {e};
+\node[replacenode] (n) [right=of e2] {t};
+\node[roundnode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm},
+deletenode/.style={circle, draw=red, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[replacenode] (s) [right=of e1] {b};
+\node[replacenode] (c) [right=of s] {i};
+\node[currentnode] (e2) [right=of h] {e};
+\node[replacenode] (n) [right=of e2] {t};
+\node[deletenode] (k) [right=of n] {k};
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+\draw[->] (n.east) -- (k.west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[roundnode/.style={circle, draw=black, fill=white, semithick, minimum size=7mm},
+currentnode/.style={circle, draw=black, fill=white, very thick, minimum size=7mm},
+replacenode/.style={circle, draw=orange, fill=white, very thick, minimum size=7mm},
+deletenode/.style={circle, draw=red, fill=white, very thick, minimum size=7mm}]
+\node[currentnode] (g) {G};
+\node[currentnode] (e1) [right=of g] {e};
+\node[currentnode] (s) [right=of e1] {b};
+\node[currentnode] (c) [right=of s] {i};
+\node[currentnode] (e2) [right=of h] {e};
+\node[currentnode] (n) [right=of e2] {t};
+
+
+\draw[->] (g.east) -- (e1.west);
+\draw[->] (e1.east) -- (s.west);
+\draw[->] (s.east) -- (c.west);
+\draw[->] (c.east) -- (e2.west);
+\draw[->] (e2.east) -- (n.west);
+
+\end{tikzpicture}
